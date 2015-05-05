@@ -1,9 +1,3 @@
--- Project: Attack of the Cuteness Game
--- http://MasteringCoronaSDK.com
--- Version: 1.0
--- Copyright 2013 J. A. Whye. All Rights Reserved.
--- "Space Cute" art by Daniel Cook (Lostgarden.com) 
-
 -- housekeeping stuff
 
 display.setStatusBar(display.HiddenStatusBar)
@@ -17,9 +11,15 @@ local spawnEnemy
 local gameTitle
 local hitPlanet
 local planet
+local levelUpdate
+local levelText
+local level = 1
 local ScoreText
 local score = 0
 local speedBump = 0
+local picIndex
+
+
 
 -- preload audio
 
@@ -34,7 +34,7 @@ local function createPlayScreen()
 	background.y = 130
 	background.alpha = 0
 	
-	planet = display.newImage("planet.png")
+	planet = display.newImage("pineapple.png")
 	planet.x = centerX
 	planet.y = display.contentHeight + 60
 	planet.alpha = 0
@@ -56,12 +56,27 @@ local function createPlayScreen()
 	scoreText.alpha = 0
 end	
 
+function levelUpdate()
+	-- Level text update?
+	level = level + 1
+	levelText = display.newText("LEVEL " .. level, 0, 0, "Helvetica", 22)
+	levelText.x = centerX
+	levelText.y = centerY
+	levelText.alpha = 0
+	local function levelR()
+		transition.to(levelText, { time= 2500, alpha=0})
+	end
+	transition.to(levelText, { time= 1000, alpha=1, onComplete=levelR })	
+
+end
 
 -- game functions
 
 function spawnEnemy()
-	local enemypics = {"beetleship.png","octopus.png", "rocketship.png"}
-	local enemy = display.newImage(enemypics[math.random (#enemypics)])
+	local enemypics = {"Patrick.png","Squidward.png","Spongebob.png","MrKrab.png"}
+	picIndex = enemypics[math.random (#enemypics)]
+	print(picIndex)
+	local enemy = display.newImage(picIndex)
 	enemy:addEventListener ( "tap", shipSmash )
 
 	-- Return either 1 or 2 
@@ -74,16 +89,30 @@ function spawnEnemy()
 	end
 	enemy.y = math.random (display.contentHeight)
 	enemy.trans = transition.to ( enemy, { x=centerX, y=centerY, time=math.random(2500-speedBump, 4500-speedBump), onComplete=hitPlanet } )
-	speedBump = speedBump + 50
+
 end
 
 
 function startGame()
-	local text = display.newText("Tap here to start. Protect the planet!", 0, 0, "Helvetica", 24)
+	local text2 = display.newText("Stop Spongebob and friends from going home!", 0, 0, "Helvetica", 18)
+	text2.x = centerX
+	text2.y = display.contentHeight - 50
+	text:setTextColor(255, 254, 185)
+	local text = display.newText("Tap here to start.", 0, 0, "Helvetica", 18)
 	text.x = centerX
 	text.y = display.contentHeight - 30
 	text:setTextColor(255, 254, 185)
+
 	local function goAway(event)
+		levelText = display.newText("LEVEL 1", 0, 0, "Helvetica", 22)
+		levelText.x = centerX
+		levelText.y = centerY
+		levelText.alpha = 0
+		local function levelR()
+			transition.to(levelText, { time= 2500, alpha=0})
+		end
+		transition.to(levelText, { time= 1000, alpha=1, onComplete=levelR })
+
 		display.remove(event.target)
 		text = nil
 		display.remove(gameTitle)
@@ -112,6 +141,7 @@ local function planetDamage()
 			planet.xScale = 1
 			planet.yScale = 1
 			planet.alpha = planet.numHits / 10
+
 		end
 		transition.to ( planet, { time=200, xScale=1.2, yScale=1.2, alpha=1, onComplete=goAway} )	
 	end
@@ -122,6 +152,10 @@ function hitPlanet(obj)
 	display.remove(obj)
 	planetDamage()
 	audio.play(sndBlast)
+	if score > 100 then
+		score = score - 56
+		scoreText.text = "Score: " .. score
+	end
 	if planet.numHits > 1 then
 		spawnEnemy()
 	end
@@ -131,14 +165,32 @@ end
 function shipSmash(event)
 	local obj = event.target
 	display.remove( obj )
-	audio.play(sndKill)
+	-- Awesome
+	if picIndex == "Patrick.png" then
+		audio.play(sndKill)
+	end
+	if picIndex == "Spongebob.png" then
+		audio.play(sndKill)
+	end
+	if picIndex == "MrKrab.png" then
+		audio.play(sndKill)
+	end
+	if picIndex == "squidward.png" then
+		audio.play(sndKill)
+	end
 	transition.cancel ( event.target.trans )
 	score = score + 28
+
+	-- Enemy Speed change?
+	speedBump = speedBump + 50
+
 	scoreText.text = "Score: " .. score
+	
 	spawnEnemy()
 	return true
 end
 
+timer.performWithDelay(15000, levelUpdate, 5)
 createPlayScreen()
 
 
