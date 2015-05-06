@@ -97,7 +97,7 @@ function startGame()
 	local text2 = display.newText("Stop Spongebob and friends from going home!", 0, 0, "Helvetica", 18)
 	text2.x = centerX
 	text2.y = display.contentHeight - 50
-	text:setTextColor(255, 254, 185)
+	text2:setTextColor(255, 254, 185)
 	local text = display.newText("Tap here to start.", 0, 0, "Helvetica", 18)
 	text.x = centerX
 	text.y = display.contentHeight - 30
@@ -116,6 +116,7 @@ function startGame()
 		display.remove(event.target)
 		text = nil
 		display.remove(gameTitle)
+		display.remove(text2)
 		spawnEnemy()
 		scoreText.alpha = 1
 		scoreText.text = "Score: 0"
